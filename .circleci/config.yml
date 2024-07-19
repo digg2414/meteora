@@ -1,0 +1,143 @@
+defaults: &defaults
+  docker:
+    - image: circleci/node:12.21.0-browsers
+  working_directory: ~/2associes/meteor-boilerplate
+  parallelism: 1
+  shell: /bin/bash --login
+  environment:
+    CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
+    CIRCLE_TEST_REPORTS: /tmp/circleci-test-reports
+
+aliases:
+  - &restore-cache
+    keys:
+      - v1-dependencies-{{ checksum "package.json" }}
+      - v1-dependencies-
+  - &save-cache
+    paths:
+      - node_modules
+      - ~/.meteor
+      - ~/.npm
+    key: v1-dependencies-{{ checksum "package.json" }}
+  - &install-meteor
+    name: Install Meteor
+    command: |
+      if [ -d ~/.meteor ]; then sudo ln -s ~/.meteor/meteor /usr/local/bin/meteor; fi
+      if [ ! -e $HOME/.meteor/meteor ]; then curl https://install.meteor.com | sh; fi
+      npm install
+  - &install-chrome
+    name: Install Chrome
+    command: |
+      wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+      sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
+      sudo apt-get update
+      sudo apt-get -y install google-chrome-stable
+
+version: 2
+jobs:
+  build:
+    <<: *defaults
+    steps:
+    - checkout
+    - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_REPORTS
+    - restore_cache: *restore-cache
+    - run: *install-meteor
+    - run: sudo npm install -g wait-on
+    - run: *install-chrome
+    - run: node --version && npm --version && java -version && meteor --version && google-chrome --version;
+    - save_cache: *save-cache
+    - run: echo $SETTINGS_DEVELOPMENT > settings-development.json
+    - run:
+        name: Run test application
+        command: npm run test
+        background: true
+    - run:
+        name: Wait for application to start
+        command: wait-on http://localhost:3000 --httpTimeout 240000 # 4 minutes
+    # - run: mkdir reports
+    # - run:
+    #     name: Run Chimp tests
+    #     command: npm run chimp-test
+    # - store_test_results:
+    #     path: reports
+    # - store_artifacts:
+    #     path: ./reports/mocha/test-results.xml
+  deploy_on_staging:
+    <<: *defaults
+    steps:
+      - checkout
+      - restore_cache: *restore-cache
+      - run: *install-meteor
+      - save_cache: *save-cache
+      - run: echo $SETTINGS_STAGING > settings-staging.json
+      - run: echo $DEPLOYMENT_TOKEN > deployment_token.json
+      - run:
+          name: Deploy to Staging
+          command: METEOR_SESSION_FILE=deployment_token.json DEPLOY_HOSTNAME=us-east-1.galaxy-deploy.meteor.com meteor deploy $DEPLOY_HOSTNAME_STAGING --settings settings-staging.json --owner 2associes --deploy-polling-timeout 1200000
+          no_output_timeout: 30m
+  deploy_on_production:
+    <<: *defaults
+    steps:
+      - checkout
+      - restore_cache: *restore-cache
+      - run: *install-meteor
+      - save_cache: *save-cache
+      - run: echo $SETTINGS > settings.json
+      - run: echo $DEPLOYMENT_TOKEN > deployment_token.json
+      - run:
+          name: Deploy to Production
+          command: METEOR_SESSION_FILE=deployment_token.json DEPLOY_HOSTNAME=us-east-1.galaxy-deploy.meteor.com meteor deploy $DEPLOY_HOSTNAME_PRODUCTION --settings settings.json --owner 2associes --deploy-polling-timeout 1200000
+          no_output_timeout: 30m
+  run_audit:
+    docker:
+      - image: kporras07/lighthouse-ci
+    steps:
+      - checkout
+      - run:
+          name: Run lighthouse against staging environment
+          environment:
+            TEST_URL: https://meteor-boilerplate.staging.2associes.net
+          command: |
+            lighthouse $TEST_URL \
+              --port=9222 \
+              --chrome-flags=\"--headless\" \
+              --output-path=/home/chrome/reports/anonymous-"$(echo -n $CIRCLE_SHELL_ENV | md5sum | awk '{print $1}')" \
+              --output=json \
+              --output=html
+      - persist_to_workspace:
+          root: /home/chrome
+          paths:
+            - reports
+  report:
+    <<: *defaults
+    steps:
+      - checkout
+      - restore_cache: *restore-cache
+      - attach_workspace:
+          at: "."
+      - store_artifacts:
+          path: reports
+          destination: reports
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build
+      - deploy_on_staging:
+          requires:
+            - build
+          filters:
+            branches:
+              only: develop
+      - run_audit:
+          requires:
+            - deploy_on_staging
+      - report:
+          requires:
+            - run_audit
+      - deploy_on_production:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master

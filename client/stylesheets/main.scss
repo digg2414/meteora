@@ -1,0 +1,80 @@
+// Project styles
+//
+// https://sass-guidelin.es/#architecture
+
+//
+// Abstracts
+//
+// https://sass-guidelin.es/#abstracts-folder
+//
+
+@import 'abstracts/functions';
+@import 'abstracts/variables';
+@import 'abstracts/mixins';
+
+// Font Awesome abstracts
+
+@import '{}/node_modules/font-awesome/scss/variables';
+@import '{}/node_modules/font-awesome/scss/mixins';
+
+// Bootstrap abstracts
+
+@import '{}/node_modules/bootstrap/scss/functions';
+@import '{}/node_modules/bootstrap/scss/variables';
+@import '{}/node_modules/bootstrap/scss/mixins';
+
+//
+// Vendors
+//
+// https://sass-guidelin.es/#vendors-folder
+//
+
+@import 'vendors/font-awesome';
+@import 'vendors/bootstrap';
+
+//
+// Vendors Extensions
+//
+
+@import 'vendors-extensions/bootstrap';
+
+//
+// Base
+//
+// https://sass-guidelin.es/#base-folder
+//
+
+@import 'base/animations';
+@import 'base/reset';
+@import 'base/typography';
+
+//
+// Components
+//
+// https://sass-guidelin.es/#components-folder
+//
+
+@import 'components/button';
+
+@import '{}/imports/ui/components/accounts-templates';
+@import '{}/imports/ui/components/loading/styles';
+@import '{}/imports/ui/components/header/styles';
+@import '{}/imports/ui/components/footer/styles';
+
+//
+// Layouts
+//
+// https://sass-guidelin.es/#layouts-folder
+//
+
+@import '{}/imports/ui/layouts/app/styles';
+
+//
+// Pages
+//
+// https://sass-guidelin.es/#pages-folder
+//
+
+@import '{}/imports/ui/pages/not-found/styles';
+@import '{}/imports/ui/pages/home/styles';
+@import '{}/imports/ui/pages/admin/style-guide/styles';

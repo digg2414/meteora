@@ -1,0 +1,110 @@
+<template name="header">
+  <header class="header  js-hide-on-scroll is-down">
+    {{> navigationMain}}
+  </header>
+</template>
+
+<template name="navigationMain">
+  <nav class="navigation-main  navbar navbar-expand-xl navbar-light bg-light">
+    <div class="navigation-main__container  container-fluid">
+      <!-- Brand and toggle get grouped for better mobile display -->
+      <a class="navigation-main__brand  navbar-brand" href="{{pathFor '/'}}">{{_ 'header.brand' }}</a>
+      <button type="button" class="navigation-main__menu-icon  navbar-toggler navbar-toggler-right" data-toggle="collapse" data-target="#navbarSupportedContent" aria-expanded="false">
+        <span class="sr-only">{{_ 'header.menuIcon' }}</span>
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="navigation-main__menu  collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navigation-main__menu-list  navbar-nav">
+          <li class="navigation-main__menu-item  navbar-item {{isActiveRoute 'home'}}">
+            <a class="navigation-main__link  nav-link" href="{{pathFor '/' }}">
+              <i class="fa fa-home"></i> {{_ 'header.navbarLinkHome' }} <span class="sr-only">({{_ 'header.navbarLinkCurrent' }})</span>
+            </a>
+          </li>
+          <li class="navigation-main__menu-item  navbar-item dropdown">
+            <a href="#" class="navigation-main__link  nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{_ 'header.navbarLinkDropdown' }} <span class="caret"></span></a>
+            <ul class="navigations-main__dropdown-list  dropdown-menu mb-3 mb-xl-0">
+              <li class="navigations-main__dropdown-item  dropdown-item">
+                <a class="navigation-main__link" href="#">
+                  {{_ 'header.navbarLinkDropdownOptionOne' }}
+                </a>
+              </li>
+              <li class="navigations-main__dropdown-item  dropdown-item">
+                <a class="navigation-main__link" href="#">
+                  {{_ 'header.navbarLinkDropdownOptionTwo' }}
+                </a>
+              </li>
+              <li class="navigations-main__dropdown-item  dropdown-item">
+                <a class="navigation-main__link" href="#">
+                  {{_ 'header.navbarLinkDropdownOptionThree' }}
+                </a>
+              </li>
+              <li role="separator" class="navigations-main__menu-divider  dropdown-divider"></li>
+              <li class="navigations-main__dropdown-item  dropdown-item">
+                <a class="navigation-main__link" href="#">
+                  {{_ 'header.navbarLinkDropdownOptionFour' }}
+                </a>
+              </li>
+              <li role="separator" class="navigations-main__menu-divider  dropdown-divider"></li>
+              <li class="navigations-main__dropdown-item  dropdown-item">
+                <a class="navigation-main__link" href="#">
+                  {{_ 'header.navbarLinkDropdownOptionFive' }}
+                </a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+        <form class="navigations-main__search  form-inline" role="search">
+          <input type="text" class="navigations-main__search-input  form-control ml-xl-4" placeholder="{{_ 'header.navbarSearchPlaceholder' }}">
+          <button type="submit" class="navigations-main__search-button  btn btn-outline-success ml-xl-1">{{_ 'header.navbarSearchButton' }}</button>
+        </form>
+        <ul class="navigation-main__menu-list  navbar-nav ml-auto">
+          <li class="navigation-main__menu-item  navbar-item">
+            <a class="navigation-main__link  nav-link" href="https://github.com/2Associes/meteor-boilerplate">
+              GitHub
+            </a>
+          </li>
+          {{#if currentUser}}
+          <li class="navigation-main__menu-item  navbar-item dropdown">
+            <a id="current-user-username" href="#" class="navigation-main__link  nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+              {{_ 'header.navbarGreetings' }} {{currentUserIdentity}} <span class="caret"></span>
+            </a>
+            <ul class="navigations-main__dropdown-list  dropdown-menu mb-3 mb-xl-0">
+              <li class="navigations-main__dropdown-item  dropdown-item">
+                <a class="navigation-main__link" href="#">
+                  {{_ 'header.navbarProfile' }}
+                </a>
+              </li>
+              <li class="navigations-main__dropdown-item  dropdown-item">
+                <a class="navigation-main__link" href="#">
+                  {{_ 'header.navbarSettings' }}
+                </a>
+              </li>
+              {{#if isInRole 'admin' 'default-group'}}
+                <li role="separator" class="navigations-main__menu-divider  dropdown-divider"></li>
+                <li class="navigations-main__dropdown-item  dropdown-item">
+                  <a class="navigation-main__link" href="{{pathFor 'styleGuide'}}">
+                    {{_ 'header.navbarStyleGuide' }}
+                  </a>
+                </li>
+                <li class="navigations-main__dropdown-item  dropdown-item">
+                  <a class="navigation-main__link" href="{{pathFor 'adminHome'}}">
+                    {{_ 'header.navbarAdmin' }}
+                  </a>
+                </li>
+              {{/if}}
+            </ul>
+          </li>
+          {{/if}}
+          <li class="navigation-main__menu-item  navbar-item">
+            {{> atNavButton}}
+          </li>
+          <li class="navigation-main__menu-item  navbar-item">
+            {{> languageSwitcher}}
+          </li>
+        </ul>
+      </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+  </nav>
+</template>

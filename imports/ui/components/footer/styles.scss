@@ -1,0 +1,9 @@
+// Footer styles here
+.footer {
+  margin-top: 30px;
+
+  &__copyright {
+    color: $text-muted;
+    text-align: center;
+  }
+}
